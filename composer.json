@@ -1,5 +1,5 @@
 {
-    "name": "sem-soft/yii2-activecollab",
+    "name": "sem-soft/yii2-filestorage",
     "description": "Yii2 component and models for storage uploaded files",
     "license": "BSD 3-Clause",
     "type": "yii2-components",
