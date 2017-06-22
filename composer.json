@@ -1,0 +1,22 @@
+{
+    "name": "sem-soft/yii2-activecollab",
+    "description": "Yii2 component and models for storage uploaded files",
+    "license": "BSD 3-Clause",
+    "type": "yii2-components",
+    "require": {
+        "php": ">=5.4.0",
+        "sem-soft/yii2-helpers": "*"
+    },
+    "authors": [
+        {
+            "name": "Samsonov Vladimir",
+            "email": "samsonov.sem@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "sem\\components\\filestorage\\": "",
+            "sem\\components\\filestorage\\models\\": ""
+        }
+    }
+}
