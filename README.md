@@ -11,8 +11,11 @@ In configuration file do
   'components'  =>  [
     ...
     'filestorage'	=>  [
-        'class' => \sem\components\filestorage\FileStorage::className(),
-    ],
+        'class'             => \sem\filestorage\FileStorage::className(),
+        'storageBaseUrl'    =>  false,
+        'storagePath'       =>  '@webroot',
+        'storageDir'        =>  'upload'
+    ]
     ...
   ],
 ...
