@@ -2,7 +2,7 @@
 ## Install by composer
 composer require sem-soft/yii2-filestorage
 ## Or add this code into require section of your composer.json and then call composer update in console
-"sem-soft/yii2-file-storage": "*"
+"sem-soft/yii2-filestorage": "*"
 ## Execute migration
 ```bash
 $ ./yii migrate/up --migrationPath=@vendor/sem-soft/yii2-filestorage/migrations
