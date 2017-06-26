@@ -1,6 +1,6 @@
 # Yii2 component and models for storage uploaded files
 ## Install by composer
-composer require sem-soft/yii2-file-storage
+composer require sem-soft/yii2-filestorage
 ## Or add this code into require section of your composer.json and then call composer update in console
 "sem-soft/yii2-file-storage": "*"
 ## Execute migration
