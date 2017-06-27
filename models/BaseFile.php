@@ -48,6 +48,13 @@ abstract class BaseFile extends \yii\db\ActiveRecord
     protected $_file;
     
     /**
+     * Перечень разрешенных расширений файлов к сохранению
+     * @var array|null
+     */
+    public $allowedExtensions;
+
+
+    /**
      * Список возможных ошибок при загрузке файлов
      * @var array 
      */
@@ -134,7 +141,18 @@ abstract class BaseFile extends \yii\db\ActiveRecord
 	     ],
 		 'filter',
 		 'filter' => '\yii\helpers\Html::encode'
-	     ]
+	     ],
+	    [['ori_extension'], function ($attribute, $params) {
+		if (!$this->hasErrors($attribute) && !empty($this->allowedExtensions)) {
+		    
+		    $extension = mb_strtolower($this->_file->extension, 'UTF-8');
+
+		    if (!in_array($extension, $this->allowedExtensions, true)) {
+			$this->addError($attribute, "Файл с расширением {$this->_file->extension} не допустим к загрузке!");
+		    }
+		    
+		}
+	    }]
         ];
     }
     
