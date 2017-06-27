@@ -75,7 +75,12 @@ class FileForm extends \yii\base\Model
         if ($this->validate()) {
 	    $file = new \sem\filestorage\models\File($this->imageFile,[
 		'group_code'	=>  'banners',
-		'object_id'	=>  '345'
+		'object_id'	=>  '345',
+		'allowedExtensions' =>	[
+		    'png',
+		    'jpeg',
+		    'jpg'
+		]
 	    ]);
 	    if ($file->save()) {
 		return $file;
