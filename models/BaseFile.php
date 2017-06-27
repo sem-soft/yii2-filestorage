@@ -4,7 +4,6 @@
  * @copyright Copyright &copy; S.E.M. 2017-
  * @license http://www.opensource.org/licenses/bsd-license.php New BSD License
  */
-
 namespace sem\filestorage\models;
 
 use Yii;
@@ -32,7 +31,7 @@ use sem\helpers\FileHelper;
  */
 abstract class BaseFile extends \yii\db\ActiveRecord
 {
- 
+
     /**
      * Имя компоненнта для работы с загружаемыми файлами
      * [[\sem\filestorage\FileStorage]]
@@ -40,32 +39,30 @@ abstract class BaseFile extends \yii\db\ActiveRecord
      */
     public $storageComponentName = 'filestorage';
 
-
     /**
      * Загруженный файл
      * @var \yii\web\UploadedFile
      */
     protected $_file;
-    
+
     /**
      * Перечень разрешенных расширений файлов к сохранению
      * @var array|null
      */
     public $allowedExtensions;
 
-
     /**
      * Список возможных ошибок при загрузке файлов
      * @var array 
      */
     protected static $_fileErrorsList = [
-	UPLOAD_ERR_INI_SIZE	    =>  "Размер принятого файла превысил максимально допустимый размер",
-	UPLOAD_ERR_FORM_SIZE	    =>	"Размер принятого файла превысил максимально допустимый размер",
-	UPLOAD_ERR_PARTIAL	    =>	"Загружаемый файл был получен только частично",
-	UPLOAD_ERR_NO_FILE	    =>	"Файл не был загружен",
-	UPLOAD_ERR_NO_TMP_DIR	    =>	"Отсутствует временная папка",
-	UPLOAD_ERR_CANT_WRITE	    =>	"Не удалось записать файл на диск",
-	UPLOAD_ERR_EXTENSION	    =>	"PHP-расширение остановило загрузку файла"
+        UPLOAD_ERR_INI_SIZE => "Размер принятого файла превысил максимально допустимый размер",
+        UPLOAD_ERR_FORM_SIZE => "Размер принятого файла превысил максимально допустимый размер",
+        UPLOAD_ERR_PARTIAL => "Загружаемый файл был получен только частично",
+        UPLOAD_ERR_NO_FILE => "Файл не был загружен",
+        UPLOAD_ERR_NO_TMP_DIR => "Отсутствует временная папка",
+        UPLOAD_ERR_CANT_WRITE => "Не удалось записать файл на диск",
+        UPLOAD_ERR_EXTENSION => "PHP-расширение остановило загрузку файла"
     ];
 
     /**
@@ -76,19 +73,19 @@ abstract class BaseFile extends \yii\db\ActiveRecord
      */
     public function __construct(UploadedFile $file = null, $config = [])
     {
-	if ($file instanceof UploadedFile) {
-	    $this->_file = $file;
+        if ($file instanceof UploadedFile) {
+            $this->_file = $file;
 
-	    $this->mime             = $this->_file->type;
-	    $this->ori_extension    = $this->_file->extension;
-	    $this->ori_name         = $this->_file->baseName;
-	    $this->sys_file         = uniqid() . '.' . $this->_file->extension;
-	    $this->size		    = $this->_file->size;
-	}
-	
+            $this->mime = $this->_file->type;
+            $this->ori_extension = $this->_file->extension;
+            $this->ori_name = $this->_file->baseName;
+            $this->sys_file = uniqid() . '.' . $this->_file->extension;
+            $this->size = $this->_file->size;
+        }
+
         parent::__construct($config);
     }
-    
+
     /**
      * Выполняем проверку на существование компонента
      * [[\sem\filestorageFileStorage]]
@@ -96,17 +93,16 @@ abstract class BaseFile extends \yii\db\ActiveRecord
      */
     public function init()
     {
-	parent::init();
-	if (
-	    (!isset(Yii::$app->{$this->storageComponentName}))
-		||
-	    (!$this->getStorageComponent() instanceof \sem\filestorage\FileStorage)
-	) {
-	    throw new \yii\base\InvalidConfigException("Компонент для работы с загружаемыми файлами не подключен");
-	}
+        parent::init();
+        if (
+            (!isset(Yii::$app->{$this->storageComponentName})) ||
+            (!$this->getStorageComponent() instanceof \sem\filestorage\FileStorage)
+        ) {
+            throw new \yii\base\InvalidConfigException("Компонент для работы с загружаемыми файлами не подключен");
+        }
     }
 
-        /**
+    /**
      * @inheritdoc
      */
     public static function tableName()
@@ -131,31 +127,30 @@ abstract class BaseFile extends \yii\db\ActiveRecord
             [['object_id'], 'string', 'max' => 11],
             [['ori_name', 'sys_file', 'mime'], 'string', 'max' => 255],
             [['sys_file'], 'unique'],
-	    [[
-		'group_code',
-		'object_id',
-		'ori_name',
-		'ori_extension',
-		'sys_file',
-		'mime',
-	     ],
-		 'filter',
-		 'filter' => '\yii\helpers\Html::encode'
-	     ],
-	    [['ori_extension'], function ($attribute, $params) {
-		if (!$this->hasErrors($attribute) && !empty($this->allowedExtensions)) {
-		    
-		    $extension = mb_strtolower($this->_file->extension, 'UTF-8');
+            [[
+                'group_code',
+                'object_id',
+                'ori_name',
+                'ori_extension',
+                'sys_file',
+                'mime',
+                ],
+                'filter',
+                'filter' => '\yii\helpers\Html::encode'
+            ],
+            [['ori_extension'], function ($attribute, $params) {
+                if (!$this->hasErrors($attribute) && !empty($this->allowedExtensions)) {
 
-		    if (!in_array($extension, $this->allowedExtensions, true)) {
-			$this->addError($attribute, "Файл с расширением {$this->_file->extension} не допустим к загрузке!");
-		    }
-		    
-		}
-	    }]
+                    $extension = mb_strtolower($this->_file->extension, 'UTF-8');
+
+                    if (!in_array($extension, $this->allowedExtensions, true)) {
+                        $this->addError($attribute, "Файл с расширением {$this->_file->extension} не допустим к загрузке!");
+                    }
+                }
+            }]
         ];
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -171,7 +166,7 @@ abstract class BaseFile extends \yii\db\ActiveRecord
             ]
         ];
     }
-    
+
     /**
      * После успешного сохранения, сохраняем файлы
      * @inheritdoc
@@ -182,7 +177,7 @@ abstract class BaseFile extends \yii\db\ActiveRecord
 
         $this->saveFile();
     }
-    
+
     /**
      * Перед удалением, удаляем физически файл
      * @return boolean
@@ -191,21 +186,20 @@ abstract class BaseFile extends \yii\db\ActiveRecord
     {
         if (parent::beforeDelete()) {
 
-	    return $this->removeFile();
-	    
+            return $this->removeFile();
         }
         return false;
     }
-    
+
     /**
      * Возвращает компонент для работы с загружаемыми файлами пользователя
      * @return \sem\filestorage\FileStorage
      */
     protected function getStorageComponent()
     {
-	return Yii::$app->{$this->storageComponentName};
+        return Yii::$app->{$this->storageComponentName};
     }
-    
+
     /**
      * Возвращает оригинальное имя файла вместе с расширением
      * @return string
@@ -214,20 +208,20 @@ abstract class BaseFile extends \yii\db\ActiveRecord
     {
         return $this->ori_name . '.' . $this->ori_extension;
     }
-    
+
     /**
      * Возвращает абсолютный путь к файлу
      * @return string|false
      */
     public function getPath()
     {
-	if (!$this->isNewRecord) {
-	    return $this->getStorageComponent()->getUploadPath($this->group_code, $this->object_id) . DIRECTORY_SEPARATOR . $this->sys_file;
-	}
-	
-	return false;
+        if (!$this->isNewRecord) {
+            return $this->getStorageComponent()->getUploadPath($this->group_code, $this->object_id) . DIRECTORY_SEPARATOR . $this->sys_file;
+        }
+
+        return false;
     }
-    
+
     /**
      * Файл не был загружен
      * 
@@ -236,7 +230,7 @@ abstract class BaseFile extends \yii\db\ActiveRecord
      */
     protected static function getErrorDescription($code)
     {
-	return isset(self::$_fileErrorsList[$code]) ? self::$_fileErrorsList[$code] : self::$_fileErrorsList[UPLOAD_ERR_NO_FILE];
+        return isset(self::$_fileErrorsList[$code]) ? self::$_fileErrorsList[$code] : self::$_fileErrorsList[UPLOAD_ERR_NO_FILE];
     }
 
     /**
@@ -244,13 +238,13 @@ abstract class BaseFile extends \yii\db\ActiveRecord
      * @return bool
      */
     abstract protected function saveFile();
-    
+
     /**
      * Производит удаление файла из файловой системы
      * @return bool
      */
     abstract protected function removeFile();
-    
+
     /**
      * Возвращает URL-адрес к файлу относительно домена
      * 
