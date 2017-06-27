@@ -8,8 +8,6 @@
 namespace sem\filestorage\models;
 
 use Yii;
-use yii\behaviors\TimestampBehavior;
-use yii\web\UploadedFile;
 use sem\helpers\FileHelper;
 
 /**
