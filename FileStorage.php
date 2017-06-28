@@ -115,7 +115,7 @@ class FileStorage extends Component
      */
     public function touchUploadDir($groupCode, $objectId = null)
     {
-        $path = $this->getStorageComponent()->getUploadPath($groupCode, $objectId);
+        $path = $this->getUploadPath($groupCode, $objectId);
 
         if (!file_exists($path)) {
             return FileHelper::createDirectory($path);
