@@ -103,6 +103,16 @@ abstract class BaseFile extends \yii\db\ActiveRecord
 
         parent::__construct($config);
     }
+    
+    /**
+     * @inheritdoc
+     */
+    public function transactions()
+    {
+        return [
+            'default' => self::OP_ALL,
+        ];
+    }
 
     /**
      * Выполняем проверку на существование компонента
@@ -135,7 +145,7 @@ abstract class BaseFile extends \yii\db\ActiveRecord
     {
         return [
             [['ori_name'], function ($attribute, $params) {
-                if (!$this->hasErrors($attribute) && $this->_file->hasError) {
+                if (!$this->hasErrors($attribute) && $this->_file && $this->_file->hasError) {
                     $this->addError($attribute, self::getErrorDescription($this->_file->error));
                 }
             }, 'skipOnEmpty' => false],
@@ -157,7 +167,7 @@ abstract class BaseFile extends \yii\db\ActiveRecord
                 'filter' => '\yii\helpers\Html::encode'
             ],
             [['ori_extension'], function ($attribute, $params) {
-                if (!$this->hasErrors($attribute) && !empty($this->allowedExtensions)) {
+                if (!$this->hasErrors($attribute)  && $this->_file && !empty($this->allowedExtensions)) {
 
                     $extension = mb_strtolower($this->_file->extension, 'UTF-8');
 
@@ -165,7 +175,7 @@ abstract class BaseFile extends \yii\db\ActiveRecord
                         $this->addError($attribute, "Файл с расширением {$this->_file->extension} не допустим к загрузке!");
                     }
                 }
-            }]
+            }, 'skipOnEmpty' => false]
         ];
     }
 
