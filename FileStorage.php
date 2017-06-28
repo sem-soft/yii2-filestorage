@@ -105,4 +105,24 @@ class FileStorage extends Component
 
         return $url;
     }
+    
+    /**
+     * Проверяет существование директории загрузок и если она не существует, то создает ее
+     * 
+     * @param string $groupCode группа файлов
+     * @param integer|string|null $objectId идентификатор объекта
+     * @return boolean
+     */
+    public function touchUploadDir($groupCode, $objectId = null)
+    {
+        $path = $this->getStorageComponent()->getUploadPath($groupCode, $objectId);
+
+        if (!file_exists($path)) {
+            return FileHelper::createDirectory($path);
+        } else {
+            return true;
+        }
+        
+        return false;
+    }
 }
