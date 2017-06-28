@@ -13,7 +13,9 @@ use yii\helpers\ArrayHelper;
 
 /**
  * Реализует логику работы с файлами изображений
+ * 
  * {@inheritdoc}
+ * @property-read boolean $isImage
  */
 class Image extends File
 {
@@ -27,7 +29,7 @@ class Image extends File
             
                 if (!$this->hasErrors($attribute) && $this->_file) {
 
-                    if (false === ($imageInfo = getimagesize($this->_file->tempName))) {
+                    if (!$this->isImage) {
                         $this->addError($attribute, "Загружаемый файл не является изображением!");
                     }
                     
@@ -35,5 +37,28 @@ class Image extends File
                 
             }]
         ]);
+    }
+    
+    /**
+     * Выполняет проверку является ли текущий файл изображением
+     * @return boolean
+     */
+    public function getIsImage()
+    {
+        if ($this->_file) {
+            
+            $filePath = $this->_file->tempName;
+            
+        } else {
+            
+            $filePath = $this->path;
+            
+        }
+        
+        if (false === getimagesize($filePath)) {
+           return false;
+        }
+        
+        return true;
     }
 }
