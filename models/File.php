@@ -7,12 +7,13 @@
 namespace sem\filestorage\models;
 
 use Yii;
+use sem\filestorage\models\BaseFile;
 use sem\helpers\FileHelper;
 
 /**
  * @inheritdoc
  */
-class File extends \sem\filestorage\models\BaseFile
+class File extends BaseFile
 {
 
     /**
@@ -22,14 +23,19 @@ class File extends \sem\filestorage\models\BaseFile
     {
 
         if ($this->_file) {
-
-            $path = $this->getStorageComponent()->getUploadPath($this->group_code, $this->object_id);
-
-            if (!file_exists($path)) {
-                FileHelper::createDirectory($path);
+            
+            // Проверка готовности директории загрузок
+            if (!$this->getStorageComponent()->touchUploadDir($this->group_code, $this->object_id)) {
+                return false;
             }
 
-            return $this->_file->saveAs($path . DIRECTORY_SEPARATOR . $this->sys_file);
+            // Сохранение файла
+            return $this->_file->saveAs(
+                $this->getStorageComponent()->getUploadPath($this->group_code, $this->object_id)
+                . DIRECTORY_SEPARATOR
+                . $this->sys_file
+            );
+            
         }
 
         return false;
@@ -41,17 +47,5 @@ class File extends \sem\filestorage\models\BaseFile
     protected function removeFile()
     {
         return !@unlink($this->getPath());
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getUrl($isAbsolute = false)
-    {
-        if (!$this->isNewRecord) {
-            return $this->getStorageComponent()->getUploadUrl($this->group_code, $this->object_id, $isAbsolute) . '/' . $this->sys_file;
-        }
-
-        return false;
     }
 }
