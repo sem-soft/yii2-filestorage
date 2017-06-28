@@ -245,11 +245,11 @@ abstract class BaseFile extends \yii\db\ActiveRecord
     {
         if (!$this->isNewRecord) {
             
-            if (is_null($this->_url)) {
-                $this->_url = $this->getStorageComponent()->getUploadPath($this->group_code, $this->object_id) . DIRECTORY_SEPARATOR . $this->sys_file;
+            if (is_null($this->_path)) {
+                $this->_path = $this->getStorageComponent()->getUploadPath($this->group_code, $this->object_id) . DIRECTORY_SEPARATOR . $this->sys_file;
             }
             
-            return $this->_url;
+            return $this->_path;
         }
 
         return false;
