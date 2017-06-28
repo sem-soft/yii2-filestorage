@@ -203,7 +203,9 @@ abstract class BaseFile extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        $this->saveFile();
+        if (!$this->saveFile()) {
+            throw new \yii\base\Exception("Не удалось сохранить файл!");
+        }
     }
 
     /**

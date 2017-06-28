@@ -47,6 +47,7 @@ class File extends BaseFile
      */
     protected function removeFile()
     {
+        echo $this->getPath();die();
         return !@unlink($this->getPath());
     }
 }
