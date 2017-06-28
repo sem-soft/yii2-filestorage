@@ -44,6 +44,24 @@ abstract class BaseFile extends \yii\db\ActiveRecord
      * @var \yii\web\UploadedFile
      */
     protected $_file;
+    
+    /**
+     * Относительный URL-адрес к файлу
+     * @var string
+     */
+    protected $_url;
+    
+    /**
+     * Абсолютный URL-адрес к файлу
+     * @var string
+     */
+    protected $_absiluteUrl;
+
+    /**
+     * Абсолютный путь к файлу
+     * @var string
+     */
+    protected $_path;
 
     /**
      * Перечень разрешенных расширений файлов к сохранению
@@ -216,7 +234,45 @@ abstract class BaseFile extends \yii\db\ActiveRecord
     public function getPath()
     {
         if (!$this->isNewRecord) {
-            return $this->getStorageComponent()->getUploadPath($this->group_code, $this->object_id) . DIRECTORY_SEPARATOR . $this->sys_file;
+            
+            if (is_null($this->_url)) {
+                $this->_url = $this->getStorageComponent()->getUploadPath($this->group_code, $this->object_id) . DIRECTORY_SEPARATOR . $this->sys_file;
+            }
+            
+            return $this->_url;
+        }
+
+        return false;
+    }
+    
+    /**
+     * Возвращает URL-адрес к файлу относительно домена
+     * 
+     * @param bool $isAbsolute абсолютный или относительный
+     * @return string|false
+     */
+    public function getUrl($isAbsolute = false)
+    {
+        if (!$this->isNewRecord) {
+            
+            if (!$isAbsolute) {
+                
+                if (is_null($this->_url)) {
+                    $this->_url = $this->getStorageComponent()->getUploadUrl($this->group_code, $this->object_id, $isAbsolute) . '/' . $this->sys_file;
+                }
+                
+                return $this->_url;
+                
+            } else {
+                
+                if (is_null($this->_absiluteUrl)) {
+                    $this->_absiluteUrl = $this->getStorageComponent()->getUploadUrl($this->group_code, $this->object_id, $isAbsolute) . '/' . $this->sys_file;
+                }
+                
+                return $this->_absiluteUrl;
+                
+            }
+            
         }
 
         return false;
@@ -232,6 +288,16 @@ abstract class BaseFile extends \yii\db\ActiveRecord
     {
         return isset(self::$_fileErrorsList[$code]) ? self::$_fileErrorsList[$code] : self::$_fileErrorsList[UPLOAD_ERR_NO_FILE];
     }
+    
+    /**
+     * Сбрасывает значения путей к файлу в NULL
+     */
+    protected function resetPathes()
+    {
+        $this->_url = null;
+        $this->_absiluteUrl = null;
+        $this->_path = null;
+    }
 
     /**
      * Производит сохранение файла в файловую систему
@@ -244,12 +310,4 @@ abstract class BaseFile extends \yii\db\ActiveRecord
      * @return bool
      */
     abstract protected function removeFile();
-
-    /**
-     * Возвращает URL-адрес к файлу относительно домена
-     * 
-     * @param bool $isAbsolute абсолютный или относительный
-     * @return string|false
-     */
-    abstract public function getUrl($isAbsolute = false);
 }
