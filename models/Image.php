@@ -118,6 +118,23 @@ class Image extends File
     }
     
     /**
+     * @inheritdoc
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            
+            if (!$insert) {
+                $this->clearCache();
+            }
+            
+            return true;
+        }
+        
+        return false;
+    }
+
+        /**
      * @inheritDoc
      */
     protected function removeFile()
