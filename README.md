@@ -116,3 +116,51 @@ Example of displaying files data
 	}
     }
 ```
+Example of displaying images data and cache
+```php
+    public function actionTest()
+    {
+        foreach (\sem\filestorage\models\Image::find()->all() as $f) {
+            echo $f->getUrl(true) . "<br>";
+            echo $f->url . "<br>";
+            echo $f->name . "<br>";
+            echo $f->path . "<br>";
+            echo $f->size . "<br>";
+            echo \sem\helpers\FileHelper::formatSize($f->size) . "<br>";
+            echo $f->isImage . "<br>";
+
+            echo "------heighten:<br>";
+            $heighten = $f->heighten(300);
+            echo $heighten->getUrl(true) . "<br>";
+            echo $heighten->url . "<br>";
+            echo $heighten->path . "<br>";
+            echo \yii\helpers\Html::img($heighten->url);
+            echo "<br>";
+
+            echo "------widen:<br>";
+            $widen = $f->widen(200);
+            echo $widen->getUrl(true) . "<br>";
+            echo $widen->url . "<br>";
+            echo $widen->path . "<br>";
+            echo \yii\helpers\Html::img($widen->url);
+            echo "<br>";
+
+            echo "------contain:<br>";
+            $contain = $f->contain(100, 120);
+            echo $contain->getUrl(true) . "<br>";
+            echo $contain->url . "<br>";
+            echo $contain->path . "<br>";
+            echo \yii\helpers\Html::img($contain->url);
+            echo "<br>";
+
+            echo "------cover:<br>";
+            $cover = $f->cover(100, 100);
+            echo $cover->getUrl(true) . "<br>";
+            echo $cover->url . "<br>";
+            echo $cover->path . "<br>";
+            echo \yii\helpers\Html::img($cover->url);
+            echo "<br>";
+            echo "<br>";
+        }
+    }
+```
