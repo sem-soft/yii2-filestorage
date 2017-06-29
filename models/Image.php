@@ -104,6 +104,29 @@ class Image extends File
                 }]
         ]);
     }
+    
+    /**
+     * @inheritdoc
+     */
+    public function beforeDelete()
+    {
+        if (parent::beforeDelete() && $this->clearCache()) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * @inheritDoc
+     */
+    protected function removeFile()
+    {
+        // Чтобы заново усановить путь к оригинальному изображению
+        $this->resetPathes();
+        
+        return @unlink($this->getPath());
+    }
 
     /**
      * Выполняет проверку является ли текущий файл изображением
@@ -136,9 +159,6 @@ class Image extends File
             $this->_imager = new ImageManager(); 
         }
         
-        // Чтобы все преобразования происходили над исходным оригинальный изображением
-        $this->resetPathes();
-        
         return $this->_imager->make($this->path);
     }
 
@@ -158,6 +178,9 @@ class Image extends File
             ->getCacheFilename($operation, $this->sys_file, $func_args);
         $this->_cacheFilePath = $this->getStorageComponent()
             ->getUploadCachePath($this->group_code, $this->object_id) . DIRECTORY_SEPARATOR . $this->_cacheFileName;
+        
+        // Чтобы все преобразования происходили над исходным оригинальный изображением
+        $this->resetPathes();
     }
     
     /**
@@ -173,7 +196,7 @@ class Image extends File
     }
     
     /**
-     * Возвращает ширину исходного изображения
+     * Возвращает ширину текущего изображения
      * @return integer
      */
     public function getWidth()
@@ -182,7 +205,7 @@ class Image extends File
     }
     
     /**
-     * Возвращает высоту сиходного изображения
+     * Возвращает высоту текущего изображения
      * @return integer
      */
     public function getHeight()
@@ -367,7 +390,7 @@ class Image extends File
      * Производит удаление кеша файла
      * @return bool
      */
-    public function clearCahce()
+    public function clearCache()
     {
         return $this->getStorageComponent()->
             flushFileCache($this->sys_file, $this->group_code, $this->object_id);
