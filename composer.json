@@ -5,7 +5,8 @@
     "type": "yii2-components",
     "require": {
         "php": ">=5.4.0",
-        "sem-soft/yii2-helpers": "*"
+        "sem-soft/yii2-helpers": "*",
+	"intervention/image": "@stable"
     },
     "authors": [
         {
