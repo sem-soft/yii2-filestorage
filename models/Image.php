@@ -144,27 +144,6 @@ class Image extends File
         
         return @unlink($this->getPath());
     }
-
-    /**
-     * Выполняет проверку является ли текущий файл изображением
-     * @return boolean
-     */
-    public function getIsImage()
-    {
-        if ($this->_file) {
-
-            $filePath = $this->_file->tempName;
-        } else {
-
-            $filePath = $this->path;
-        }
-
-        if (false === getimagesize($filePath)) {
-            return false;
-        }
-
-        return true;
-    }
     
     /**
      * Компонент для работы с изображениями
@@ -191,10 +170,11 @@ class Image extends File
         if (!$this->isImage) {
             throw new Exception("Файл не является изображением");
         }
-        $this->_cacheFileName = $this->getStorageComponent()
-            ->getCacheFilename($operation, $this->sys_file, $func_args);
-        $this->_cacheFilePath = $this->getStorageComponent()
-            ->getUploadCachePath($this->group_code, $this->object_id) . DIRECTORY_SEPARATOR . $this->_cacheFileName;
+        $this->_cacheFileName = $this->storageComponent
+            ->generateCacheFilename($operation, $func_args);
+        
+        $this->_cacheFilePath = $this->storageComponent
+            ->uploadCachePath . DIRECTORY_SEPARATOR . $this->_cacheFileName;
         
         // Чтобы все преобразования происходили над исходным оригинальный изображением
         $this->resetPathes();
@@ -206,10 +186,12 @@ class Image extends File
     protected function afterOperation()
     {
         $this->_path = $this->_cacheFilePath;
-        $this->_url = $this->getStorageComponent()
-            ->getUploadCacheUrl($this->group_code, $this->object_id, false) . '/' . $this->_cacheFileName;
-        $this->_absoluteUrl = $this->getStorageComponent()
-            ->getUploadCacheUrl($this->group_code, $this->object_id, true) . '/' . $this->_cacheFileName;
+        
+        $this->_url = $this->storageComponent
+            ->getUploadCacheUrl(false) . '/' . $this->_cacheFileName;
+        
+        $this->_absoluteUrl = $this->storageComponent
+            ->getUploadCacheUrl(true) . '/' . $this->_cacheFileName;
     }
     
     /**
@@ -249,10 +231,7 @@ class Image extends File
         
         if (!file_exists($this->_cacheFilePath)) {
 
-            $this->getStorageComponent()->touchUploadCacheDir(
-                $this->group_code,
-                $this->object_id
-            );
+            $this->storageComponent->touchUploadCacheDir();
 
             $callback = function ($constraint) use ($upsize) {
                 if ($upsize) {
@@ -289,10 +268,7 @@ class Image extends File
 
         if (!file_exists($this->_cacheFilePath)) {
 
-            $this->getStorageComponent()->touchUploadCacheDir(
-                $this->group_code,
-                $this->object_id
-            );
+            $this->storageComponent->touchUploadCacheDir();
 
             $callback = function ($constraint) use ($upsize) {
                 if ($upsize) {
@@ -332,10 +308,7 @@ class Image extends File
         
         if (!file_exists($this->_cacheFilePath)) {
 
-            $this->getStorageComponent()->touchUploadCacheDir(
-                $this->group_code,
-                $this->object_id
-            );
+            $this->storageComponent->touchUploadCacheDir();
             
             $callback = function ($constraint) use ($upsize) {
                 if ($upsize) {
@@ -379,10 +352,7 @@ class Image extends File
         
         if (!file_exists($this->_cacheFilePath)) {
 
-            $this->getStorageComponent()->touchUploadCacheDir(
-                $this->group_code,
-                $this->object_id
-            );
+            $this->storageComponent->touchUploadCacheDir();
             
             $callback = function($constraint) use ($upsize) {
                 if ($upsize) {
@@ -409,7 +379,7 @@ class Image extends File
      */
     public function clearCache()
     {
-        return $this->getStorageComponent()->
-            flushFileCache($this->sys_file, $this->group_code, $this->object_id);
+        return $this->storageComponent->
+            flushFileCache();
     }
 }

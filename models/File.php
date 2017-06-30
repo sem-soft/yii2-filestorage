@@ -26,15 +26,13 @@ class File extends BaseFile
         if ($this->_file) {
             
             // Проверка готовности директории загрузок
-            if (!$this->getStorageComponent()->touchUploadDir($this->group_code, $this->object_id)) {
+            if (!$this->storageComponent->touchUploadDir()) {
                 return false;
             }
 
             // Сохранение файла
             return $this->_file->saveAs(
-                $this->getStorageComponent()->getUploadPath($this->group_code, $this->object_id)
-                . DIRECTORY_SEPARATOR
-                . $this->sys_file
+                $this->storageComponent->getFilePath()
             );
             
         }

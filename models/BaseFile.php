@@ -10,6 +10,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\web\UploadedFile;
 use sem\helpers\FileHelper;
+use sem\filestorage\FileStorage;
 
 /**
  * AR-модель для хранения и доступа к файлам разных типов
@@ -28,6 +29,8 @@ use sem\helpers\FileHelper;
  * @property string $url
  * @property string $path
  * @property string $name
+ * 
+ * @property-read \sem\filestorage\FileStorage $storageComponent
  */
 abstract class BaseFile extends \yii\db\ActiveRecord
 {
@@ -124,7 +127,7 @@ abstract class BaseFile extends \yii\db\ActiveRecord
         parent::init();
         if (
             (!isset(Yii::$app->{$this->storageComponentName})) ||
-            (!$this->getStorageComponent() instanceof \sem\filestorage\FileStorage)
+            (!$this->getStorageComponent() instanceof FileStorage)
         ) {
             throw new \yii\base\InvalidConfigException("Компонент для работы с загружаемыми файлами не подключен");
         }
@@ -222,12 +225,34 @@ abstract class BaseFile extends \yii\db\ActiveRecord
     }
 
     /**
+     * Выполняет проверку является ли текущий файл изображением
+     * @return boolean
+     */
+    public function getIsImage()
+    {
+        if ($this->_file) {
+
+            $filePath = $this->_file->tempName;
+            
+        } else {
+
+            $filePath = $this->path;
+        }
+
+        if (false === getimagesize($filePath)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Возвращает компонент для работы с загружаемыми файлами пользователя
      * @return \sem\filestorage\FileStorage
      */
     protected function getStorageComponent()
     {
-        return Yii::$app->{$this->storageComponentName};
+        return Yii::$app->{$this->storageComponentName}->setFile($this);
     }
 
     /**
@@ -248,7 +273,7 @@ abstract class BaseFile extends \yii\db\ActiveRecord
         if (!$this->isNewRecord) {
 
             if (is_null($this->_path)) {
-                $this->_path = $this->getStorageComponent()->getUploadPath($this->group_code, $this->object_id) . DIRECTORY_SEPARATOR . $this->sys_file;
+                $this->_path = $this->storageComponent->filePath;
             }
 
             return $this->_path;
@@ -267,17 +292,20 @@ abstract class BaseFile extends \yii\db\ActiveRecord
     {
         if (!$this->isNewRecord) {
 
+            $url = $this->storageComponent->getFileUrl($isAbsolute);
+            
             if (!$isAbsolute) {
 
                 if (is_null($this->_url)) {
-                    $this->_url = $this->getStorageComponent()->getUploadUrl($this->group_code, $this->object_id, $isAbsolute) . '/' . $this->sys_file;
+                    $this->_url = $url;
                 }
 
                 return $this->_url;
+                
             } else {
 
                 if (is_null($this->_absoluteUrl)) {
-                    $this->_absoluteUrl = $this->getStorageComponent()->getUploadUrl($this->group_code, $this->object_id, $isAbsolute) . '/' . $this->sys_file;
+                    $this->_absoluteUrl = $url;
                 }
 
                 return $this->_absoluteUrl;
