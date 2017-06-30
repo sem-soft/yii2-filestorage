@@ -12,9 +12,11 @@ use yii\base\InvalidConfigException;
 use yii\base\ErrorException;
 use yii\helpers\Url;
 use sem\helpers\FileHelper;
+use sem\filestorage\models\BaseFile;
 
 /**
  * Компонент-конфигуратор механизма работы с загружаемыми файлами пользователя
+ * @property BaseFile $file
  */
 class FileStorage extends Component
 {
@@ -43,6 +45,12 @@ class FileStorage extends Component
      * @var string
      */
     public $storageDir = 'upload';
+    
+    /**
+     * Файл, для которого производится вычисление путей
+     * @var BaseFile|null
+     */
+    protected $_file;
 
     /**
      * При инициализации проверяем необходимые конфигурационные переменные
@@ -62,45 +70,76 @@ class FileStorage extends Component
             throw new InvalidConfigException("Параметр 'storageDir' должен быть указан");
         }
     }
+    
+    /**
+     * Устанавливает файл для вычислений
+     * @param BaseFile $file
+     * @return \sem\filestorage\FileStorage
+     */
+    public function setFile(BaseFile $file)
+    {
+        $this->_file = $file;
+        
+        return $this;
+    }
+    
+    /**
+     * Возвращает файл для производства вычислений путей
+     * @throws ErrorException в случае, если файл не был задан
+     */
+    protected function getFile()
+    {
+        if (is_null($this->_file)) {
+            throw new ErrorException("Не задан файл для операций");
+        }
+        
+        return $this->_file;
+    }
 
     /**
      * Возвращает абсолютный путь к директории хранения файлов определенного типа
      * 
-     * @param string $groupCode группа файлов
-     * @param integer|string|null $objectId идентификатор объекта
      * @return string
      */
-    public function getUploadPath($groupCode, $objectId = null)
+    public function getUploadPath()
     {
-        $path = $this->storagePath . DIRECTORY_SEPARATOR . $this->storageDir . DIRECTORY_SEPARATOR . $groupCode;
+        $path = $this->storagePath . DIRECTORY_SEPARATOR . $this->storageDir . DIRECTORY_SEPARATOR . $this->file->group_code;
 
-        if ($objectId) {
-            $path .= DIRECTORY_SEPARATOR . $objectId;
+        if ($this->file->object_id) {
+            $path .= DIRECTORY_SEPARATOR . $this->file->object_id;
         }
 
         return FileHelper::normalizePath(Yii::getAlias($path));
+    }
+    
+    /**
+     * Возвращает полный путь к файлу в файловой системе
+     * @return string
+     */
+    public function getFilePath()
+    {
+        return $this->uploadPath . DIRECTORY_SEPARATOR . $this->file->sys_file;
     }
 
     /**
      * Возвращает URL-адрес до директории нахождения файлов определенного типа
      * 
-     * @param string $groupCode группа файлов
-     * @param integer|string|null $objectId идентификатор объекта
      * @param bool $isAbsolute возвращать абсолютный (полный) URL
      * @return string
      */
-    public function getUploadUrl($groupCode, $objectId = null, $isAbsolute = false)
+    public function getUploadUrl($isAbsolute = false)
     {
 
-        $url = '/' . $this->storageDir . '/' . $groupCode;
+        $url = '/' . $this->storageDir . '/' . $this->file->group_code;
 
-        if ($objectId) {
-            $url .= '/' . $objectId;
+        if ($this->file->object_id) {
+            $url .= '/' . $this->file->object_id;
         }
 
         if ($this->storageBaseUrl !== false) {
 
             $url = Url::to($this->storageBaseUrl . $url, true);
+            
         } else {
 
             if ($isAbsolute) {
@@ -110,17 +149,26 @@ class FileStorage extends Component
 
         return $url;
     }
+    
+    /**
+     * Возвращает абсолютный или относительный URL-адрес к файлу
+     * 
+     * @param bool $isAbsolute возвращать абсолютный (полный) URL
+     * @return string
+     */
+    public function getFileUrl($isAbsolute = false)
+    {
+        return $this->getUploadUrl($isAbsolute) . '/' . $this->file->sys_file;
+    }
 
     /**
      * Проверяет существование директории загрузок и если она не существует, то создает ее
      * 
-     * @param string $groupCode группа файлов
-     * @param integer|string|null $objectId идентификатор объекта
      * @return boolean
      */
-    public function touchUploadDir($groupCode, $objectId = null)
+    public function touchUploadDir()
     {
-        $path = $this->getUploadPath($groupCode, $objectId);
+        $path = $this->uploadPath;
 
         if (!file_exists($path)) {
             return FileHelper::createDirectory($path);
@@ -134,13 +182,11 @@ class FileStorage extends Component
     /**
      * Проверяет существование директории загрузок кеша и если она не существует, то создает ее
      * 
-     * @param string $groupCode группа файлов
-     * @param integer|string|null $objectId идентификатор объекта
      * @return boolean
      */
-    public function touchUploadCacheDir($groupCode, $objectId = null)
+    public function touchUploadCacheDir()
     {
-        $path = $this->getUploadPath($groupCode, $objectId) . DIRECTORY_SEPARATOR . self::CACHE_DIR_NAME;
+        $path = $this->uploadPath . DIRECTORY_SEPARATOR . self::CACHE_DIR_NAME;
 
         if (!file_exists($path)) {
             return FileHelper::createDirectory($path);
@@ -154,52 +200,45 @@ class FileStorage extends Component
     /**
      * Возвращает абсолютный путь к директории хранения файлов кеша определенного типа
      * 
-     * @param string $groupCode группа файлов
-     * @param integer|string|null $objectId идентификатор объекта
      * @return string
      */
-    public function getUploadCachePath($groupCode, $objectId = null)
+    public function getUploadCachePath()
     {
-        return $this->getUploadPath($groupCode, $objectId) . DIRECTORY_SEPARATOR . self::CACHE_DIR_NAME;
+        return $this->uploadPath . DIRECTORY_SEPARATOR . self::CACHE_DIR_NAME;
     }
 
     /**
      * Возвращает URL-адрес файлу кеша определенного типа
-     * 
-     * @param string $groupCode группа файлов
-     * @param integer|string|null $objectId идентификатор объекта
+     *
      * @param bool $isAbsolute возвращать абсолютный (полный) URL
      * @return string
      */
-    public function getUploadCacheUrl($groupCode, $objectId = null, $isAbsolute = false)
+    public function getUploadCacheUrl($isAbsolute = false)
     {
-        return $this->getUploadUrl($groupCode, $objectId, $isAbsolute) . '/' . self::CACHE_DIR_NAME;
+        return $this->getUploadUrl($isAbsolute) . '/' . self::CACHE_DIR_NAME;
     }
 
     /**
      * Генерирует имя кеш-файла оригинала
      * 
      * @param string $function функция преобразования оригинала
-     * @param string $sys_file имя оригинального файла в ФС с расширением
      * @param string $params массив значений для примеси в имя
      * @return string
      */
-    public function getCacheFilename($function, $sys_file, $params)
+    public function generateCacheFilename($function, $params)
     {
-        return mb_substr($function, 0, 3, 'UTF-8') . '_' . implode('_', $params) . '_' . $sys_file;
+        return mb_substr($function, 0, 3, 'UTF-8') . '_' . implode('_', $params) . '_' . $this->file->sys_file;
     }
     
     /**
      * Производит удаление директории кеша файлов определеного типа
      * 
-     * @param string $groupCode группа файлов
-     * @param integer|string|null $objectId идентификатор объекта
      * @return bool
      */
-    public function flushUploadDirCache($groupCode, $objectId = null)
+    public function flushUploadDirCache()
     {
         try {
-            FileHelper::removeDirectory($this->getUploadCachePath($groupCode, $objectId));
+            FileHelper::removeDirectory($this->uploadCachePath);
         } catch (ErrorException $exc) {
             return false;
         }
@@ -210,17 +249,14 @@ class FileStorage extends Component
     /**
      * Производит удаление файлов кеша оригинального файла
      * 
-     * @param string $sysFile имя системного оригинального файла с расширением
-     * @param string $groupCode группа файлов
-     * @param integer|string|null $objectId идентификатор объекта
      * @return boolean
      */
-    public function flushFileCache($sysFile, $groupCode, $objectId = null)
+    public function flushFileCache()
     {
-        foreach (FileHelper::findFiles($this->getUploadCachePath($groupCode, $objectId), [
+        foreach (FileHelper::findFiles($this->uploadCachePath, [
             'recursive' => false,
             'only' => [
-                '*_' . $sysFile,
+                '*_' . $this->file->sys_file,
             ],
             'caseSensitive' => false
         ]) as $file) {
