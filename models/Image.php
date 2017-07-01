@@ -108,27 +108,15 @@ class Image extends File
     /**
      * @inheritdoc
      */
-    public function beforeDelete()
-    {
-        if (parent::beforeDelete() && $this->clearCache()) {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    /**
-     * @inheritdoc
-     */
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
             
             if (!$insert) {
-                $this->clearCache();
+                return $this->clearCache();
+            } else {
+                return true;
             }
-            
-            return true;
         }
         
         return false;
@@ -142,7 +130,7 @@ class Image extends File
         // Чтобы заново усановить путь к оригинальному изображению
         $this->resetPathes();
         
-        return @unlink($this->getPath());
+        return $this->clearCache() && @unlink($this->getPath());
     }
     
     /**
