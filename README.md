@@ -44,6 +44,21 @@ Example of Controller action for file uploading
 	]);
     }
  ```
+ ```php
+     public function actionIndex1()
+    {
+        $model = new \backend\models\FileForm();
+
+
+            $model->imageFile = new \sem\filestorage\adapters\RemoteFile("https://cs7065.userapi.com/c836722/v836722161/4bff2/mdg7cPZvLrM.jpg");
+
+            $file = $model->upload();
+
+        return $this->render('index', [
+                'model' => $model
+        ]);
+    }
+ ```
 Example of Upload From Model
 ```php
 <?php
