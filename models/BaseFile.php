@@ -209,6 +209,12 @@ abstract class BaseFile extends \yii\db\ActiveRecord
         if (!$this->saveFile()) {
             throw new \yii\base\Exception("Не удалось сохранить файл!");
         }
+        
+        if ($this->storageComponent->filemode) {
+            if (!chmod($this->storageComponent->filePath, $this->storageComponent->filemode)) {
+                throw new \yii\base\Exception("Не удалось изменить права на созданный файл на {$this->storageComponent->filemode}!");
+            }
+        }
     }
 
     /**

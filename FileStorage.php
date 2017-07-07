@@ -47,6 +47,14 @@ class FileStorage extends Component
     public $storageDir = 'upload';
     
     /**
+     * Если заданы права, 
+     * то после создания файла они будут принудительно назначены
+     * @var number|null
+     */
+    public $filemode;
+
+
+    /**
      * Файл, для которого производится вычисление путей
      * @var BaseFile|null
      */

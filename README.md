@@ -18,7 +18,8 @@ In configuration file do
         'class'             => \sem\filestorage\FileStorage::className(),
         'storageBaseUrl'    =>  false,
         'storagePath'       =>  '@webroot',
-        'storageDir'        =>  'upload'
+        'storageDir'        =>  'upload',
+        'filemode'          =>  0775 // Если задан, то после создания файла принудительно будет произведена смена прав на указанные
     ]
     ...
   ],
