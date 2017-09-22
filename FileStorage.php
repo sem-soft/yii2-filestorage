@@ -194,7 +194,7 @@ class FileStorage extends Component
      */
     public function touchUploadCacheDir()
     {
-        $path = $this->uploadPath . DIRECTORY_SEPARATOR . self::CACHE_DIR_NAME;
+        $path = $this->uploadCachePath;
 
         if (!file_exists($path)) {
             return FileHelper::createDirectory($path);
@@ -261,6 +261,10 @@ class FileStorage extends Component
      */
     public function flushFileCache()
     {
+        if (!file_exists($this->uploadCachePath)) {
+            return true;
+        }
+        
         foreach (FileHelper::findFiles($this->uploadCachePath, [
             'recursive' => false,
             'only' => [
