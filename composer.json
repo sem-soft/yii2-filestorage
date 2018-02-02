@@ -1,7 +1,7 @@
 {
     "name": "sem-soft/yii2-filestorage",
     "description": "Yii2 component and models for storage uploaded files",
-    "license": "BSD 3-Clause",
+    "license": "BSD-3-Clause",
     "type": "yii2-components",
     "require": {
         "php": ">=5.4.0",
